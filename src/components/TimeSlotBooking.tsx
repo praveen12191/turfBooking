@@ -34,9 +34,15 @@ const TimeSlotBooking: React.FC<TimeSlotBookingProps> = ({ game, onBack, onBooki
   };
 
   const handleSlotSelect = (time: string, courtIndex: number) => {
-    // Clear previous selection and set new one
-    setSelectedTimeSlot(time);
-    setSelectedCourt(courtIndex);
+    if (selectedTimeSlot === time && selectedCourt === courtIndex) {
+      // Deselect if clicking the same slot
+      setSelectedTimeSlot(null);
+      setSelectedCourt(null);
+    } else {
+      // Select new slot
+      setSelectedTimeSlot(time);
+      setSelectedCourt(courtIndex);
+    }
   };
 
   const handleBooking = () => {
@@ -45,31 +51,25 @@ const TimeSlotBooking: React.FC<TimeSlotBookingProps> = ({ game, onBack, onBooki
     }
   };
 
-  // Group time slots by hour for clock-like display
+  // Group slots by 2-hour periods for better organization
   const groupedSlots = useMemo(() => {
-    const groups: { [hour: string]: TimeSlot[] } = {};
+    const groups: { [key: string]: TimeSlot[] } = {};
     timeSlots.forEach(slot => {
-      const hour = slot.time.split(':')[0];
-      if (!groups[hour]) {
-        groups[hour] = [];
+      const hour = parseInt(slot.time.split(':')[0]);
+      const period = Math.floor(hour / 2) * 2;
+      const key = `${period.toString().padStart(2, '0')}:00`;
+      if (!groups[key]) {
+        groups[key] = [];
       }
-      groups[hour].push(slot);
+      groups[key].push(slot);
     });
     return groups;
   }, [timeSlots]);
 
-  const getClockPosition = (hour: number) => {
-    const angle = (hour % 12) * 30 - 90; // 30 degrees per hour, start from top
-    const radius = 140;
-    const x = Math.cos(angle * Math.PI / 180) * radius;
-    const y = Math.sin(angle * Math.PI / 180) * radius;
-    return { x, y };
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -130,117 +130,97 @@ const TimeSlotBooking: React.FC<TimeSlotBookingProps> = ({ game, onBack, onBooki
           </div>
         </div>
 
-        {/* Clock-like Time Slots */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
-          <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">Select Time Slot</h3>
-          
-          {/* Legend */}
-          <div className="flex flex-wrap justify-center items-center gap-4 mb-8 p-4 bg-gray-50 rounded-lg">
+        {/* Legend */}
+        <div className="bg-white rounded-xl shadow-sm border p-4 mb-6">
+          <div className="flex flex-wrap justify-center items-center gap-6">
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+              <div className="w-4 h-4 bg-green-500 rounded"></div>
               <span className="text-sm text-gray-600">Available</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+              <div className="w-4 h-4 bg-red-500 rounded"></div>
               <span className="text-sm text-gray-600">Booked</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+              <div className="w-4 h-4 bg-blue-500 rounded ring-2 ring-blue-300"></div>
               <span className="text-sm text-gray-600">Selected</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
+              <div className="w-4 h-4 bg-gray-300 rounded"></div>
               <span className="text-sm text-gray-600">Past/Unavailable</span>
             </div>
           </div>
+        </div>
 
-          {/* Clock Interface */}
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Clock Display */}
-            <div className="flex-1 flex justify-center">
-              <div className="relative w-80 h-80 mx-auto">
-                {/* Clock Face */}
-                <div className="absolute inset-0 border-4 border-gray-200 rounded-full bg-gradient-to-br from-white to-gray-50"></div>
-                
-                {/* Hour Markers */}
-                {Array.from({ length: 12 }, (_, i) => {
-                  const hour = i === 0 ? 12 : i;
-                  const position = getClockPosition(i);
-                  return (
-                    <div
-                      key={i}
-                      className="absolute w-8 h-8 flex items-center justify-center text-sm font-bold text-gray-700 transform -translate-x-1/2 -translate-y-1/2"
-                      style={{
-                        left: `calc(50% + ${position.x}px)`,
-                        top: `calc(50% + ${position.y}px)`
-                      }}
-                    >
-                      {hour}
+        {/* Innovative Horizontal Time Slots */}
+        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
+          <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">Select Time & Court</h3>
+          
+          <div className="space-y-8">
+            {Object.entries(groupedSlots).map(([periodStart, slots]) => {
+              const startHour = parseInt(periodStart.split(':')[0]);
+              const endHour = startHour + 2;
+              const periodLabel = `${formatTime(periodStart)} - ${formatTime(`${endHour.toString().padStart(2, '0')}:00`)}`;
+              
+              return (
+                <div key={periodStart} className="space-y-4">
+                  <h4 className="text-lg font-semibold text-gray-800 text-center bg-gray-50 py-2 rounded-lg">
+                    {periodLabel}
+                  </h4>
+                  
+                  {/* Horizontal Slot Container */}
+                  <div className="relative">
+                    {/* Time Labels */}
+                    <div className="flex justify-between mb-2 px-2">
+                      {slots.map((slot, index) => (
+                        <div key={slot.time} className="text-xs text-gray-500 text-center" style={{ width: `${100 / slots.length}%` }}>
+                          {slot.time}
+                        </div>
+                      ))}
                     </div>
-                  );
-                })}
-
-                {/* Center Circle */}
-                <div className="absolute top-1/2 left-1/2 w-4 h-4 bg-gray-400 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
-                
-                {/* Clock Hands for Current Time */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div 
-                    className="absolute w-1 bg-gray-600 origin-bottom"
-                    style={{
-                      height: '60px',
-                      transform: `rotate(${(parseInt(currentTime.split(':')[0]) % 12) * 30}deg) translateY(-50%)`
-                    }}
-                  ></div>
-                  <div 
-                    className="absolute w-0.5 bg-gray-400 origin-bottom"
-                    style={{
-                      height: '80px',
-                      transform: `rotate(${parseInt(currentTime.split(':')[1]) * 6}deg) translateY(-50%)`
-                    }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Time Slots List */}
-            <div className="flex-1">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Available Slots</h4>
-              <div className="space-y-2 max-h-80 overflow-y-auto">
-                {Object.entries(groupedSlots).map(([hour, slots]) => (
-                  <div key={hour} className="border border-gray-200 rounded-lg p-3">
-                    <h5 className="font-semibold text-gray-800 mb-2">
-                      {parseInt(hour) === 0 ? '12' : parseInt(hour) > 12 ? parseInt(hour) - 12 : hour}:00 {parseInt(hour) >= 12 ? 'PM' : 'AM'}
-                    </h5>
-                    <div className="grid grid-cols-2 gap-2">
-                      {slots.map((slot) => (
-                        <div key={slot.time} className="space-y-1">
-                          <p className="text-xs text-gray-600 text-center">{formatTime(slot.time)}</p>
-                          <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${game.courts}, 1fr)` }}>
-                            {Array.from({ length: game.courts }, (_, courtIndex) => {
+                    
+                    {/* Court Layers */}
+                    <div className="space-y-2">
+                      {Array.from({ length: game.courts }, (_, courtIndex) => (
+                        <div key={courtIndex} className="relative">
+                          {/* Court Label */}
+                          <div className="absolute -left-16 top-1/2 transform -translate-y-1/2 text-sm font-medium text-gray-700">
+                            Court {courtIndex + 1}
+                          </div>
+                          
+                          {/* Horizontal Slot Row */}
+                          <div className="flex gap-1 ml-4">
+                            {slots.map((slot) => {
                               const isAvailable = isSlotAvailable(slot, courtIndex);
                               const isPast = isSlotPast(slot.time);
                               const isSelected = selectedTimeSlot === slot.time && selectedCourt === courtIndex;
                               
-                              let buttonClass = "w-full h-8 rounded text-xs font-medium transition-all duration-200 ";
+                              let slotClass = "h-12 rounded-lg transition-all duration-200 cursor-pointer border-2 flex items-center justify-center relative group ";
                               
                               if (isPast || !isAvailable) {
-                                buttonClass += "bg-gray-300 text-gray-500 cursor-not-allowed";
+                                slotClass += "bg-red-500 border-red-600 cursor-not-allowed";
                               } else if (isSelected) {
-                                buttonClass += "bg-blue-500 text-white ring-2 ring-blue-300 shadow-lg";
+                                slotClass += "bg-blue-500 border-blue-600 ring-2 ring-blue-300 shadow-lg scale-105";
                               } else {
-                                buttonClass += "bg-green-500 text-white hover:bg-green-600 hover:shadow-md transform hover:scale-105";
+                                slotClass += "bg-green-500 border-green-600 hover:bg-green-600 hover:scale-105 hover:shadow-md";
                               }
 
                               return (
-                                <button
-                                  key={courtIndex}
+                                <div
+                                  key={`${slot.time}-${courtIndex}`}
                                   onClick={() => !isPast && isAvailable && handleSlotSelect(slot.time, courtIndex)}
-                                  disabled={isPast || !isAvailable}
-                                  className={buttonClass}
+                                  className={slotClass}
+                                  style={{ width: `${100 / slots.length}%` }}
                                 >
-                                  C{courtIndex + 1}
-                                </button>
+                                  {/* Slot Status Indicator */}
+                                  <div className="w-2 h-2 rounded-full bg-white opacity-80"></div>
+                                  
+                                  {/* Hover Tooltip */}
+                                  <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                    {formatTime(slot.time)} - Court {courtIndex + 1}
+                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-2 border-transparent border-t-gray-900"></div>
+                                  </div>
+                                </div>
                               );
                             })}
                           </div>
@@ -248,9 +228,9 @@ const TimeSlotBooking: React.FC<TimeSlotBookingProps> = ({ game, onBack, onBooki
                       ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
