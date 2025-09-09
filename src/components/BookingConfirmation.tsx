@@ -1,20 +1,22 @@
-import React from 'react';
-import { CheckCircle, Calendar, Clock, MapPin, Trophy } from 'lucide-react';
-import { Game } from '../types';
-import { formatTime } from '../utils/timeUtils';
+import React from "react";
+import { CheckCircle, Calendar, Clock, MapPin, Trophy } from "lucide-react";
+import { Game } from "../types";
+import { formatTime } from "../utils/timeUtils";
 
 interface BookingConfirmationProps {
   game: Game;
-  timeSlot: string;
+  timeSlots: string[];
   court: number;
+  totalCost: number;
   onNewBooking: () => void;
 }
 
-const BookingConfirmation: React.FC<BookingConfirmationProps> = ({ 
-  game, 
-  timeSlot, 
-  court, 
-  onNewBooking 
+const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
+  game,
+  timeSlots,
+  court,
+  totalCost,
+  onNewBooking,
 }) => {
   const bookingId = `TB${Date.now().toString().slice(-6)}`;
 
@@ -38,7 +40,9 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
         {/* Booking Details Card */}
         <div className="bg-white rounded-2xl shadow-xl border p-6 mb-6">
           <div className="text-center mb-6">
-            <p className="text-sm text-gray-500 uppercase tracking-wide">Booking ID</p>
+            <p className="text-sm text-gray-500 uppercase tracking-wide">
+              Booking ID
+            </p>
             <p className="text-2xl font-bold text-gray-900">{bookingId}</p>
           </div>
 
@@ -60,11 +64,11 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
               <div className="flex-1">
                 <p className="text-sm text-gray-500">Date</p>
                 <p className="font-semibold text-gray-900">
-                  {new Date().toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                  {new Date().toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
                 </p>
               </div>
@@ -75,8 +79,32 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
                 <Clock className="h-6 w-6 text-orange-600" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-gray-500">Time</p>
-                <p className="font-semibold text-gray-900">{formatTime(timeSlot)}</p>
+                <p className="text-sm text-gray-500">Time Slots</p>
+                <div className="space-y-1">
+                  {timeSlots.length > 3 ? (
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        {timeSlots.length} slots selected
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {formatTime(timeSlots[0])} -{" "}
+                        {formatTime(timeSlots[timeSlots.length - 1])}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-1">
+                      {timeSlots.sort().map((time, index) => (
+                        <span
+                          key={time}
+                          className="text-sm font-semibold text-gray-900"
+                        >
+                          {formatTime(time)}
+                          {index < timeSlots.length - 1 ? "," : ""}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -89,12 +117,26 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
                 <p className="font-semibold text-gray-900">Court {court + 1}</p>
               </div>
             </div>
+
+            <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <span className="text-lg font-bold text-green-600">₹</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-gray-500">Total Cost</p>
+                <p className="font-bold text-gray-900 text-lg">
+                  ₹{totalCost.toLocaleString()}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Important Notes */}
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-          <h4 className="font-semibold text-yellow-800 mb-2">Important Notes:</h4>
+          <h4 className="font-semibold text-yellow-800 mb-2">
+            Important Notes:
+          </h4>
           <ul className="text-sm text-yellow-700 space-y-1">
             <li>• Please arrive 10 minutes before your slot</li>
             <li>• Cancellation allowed up to 2 hours before</li>

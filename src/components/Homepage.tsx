@@ -1,5 +1,5 @@
-import React from 'react';
-import { Calendar, Clock, Users, Trophy } from 'lucide-react';
+import React from "react";
+import { Calendar, Clock, Users, Trophy } from "lucide-react";
 
 interface HomepageProps {
   onBookSlot: () => void;
@@ -9,10 +9,10 @@ const Homepage: React.FC<HomepageProps> = ({ onBookSlot }) => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background Image */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=1920)'
+          backgroundImage: `url('/images/media-5.jfif')`,
         }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
@@ -25,12 +25,27 @@ const Homepage: React.FC<HomepageProps> = ({ onBookSlot }) => {
           <div className="flex items-center justify-between max-w-7xl mx-auto">
             <div className="flex items-center space-x-2">
               <Trophy className="h-8 w-8 text-green-400" />
-              <h1 className="text-2xl font-bold text-white">TurfBooker</h1>
+              <h1 className="text-2xl font-bold text-white">Turfers</h1>
             </div>
             <nav className="hidden md:flex space-x-6">
-              <a href="#" className="text-white hover:text-green-400 transition-colors">Home</a>
-              <a href="#" className="text-white hover:text-green-400 transition-colors">Sports</a>
-              <a href="#" className="text-white hover:text-green-400 transition-colors">Contact</a>
+              <a
+                href="#"
+                className="text-white hover:text-green-400 transition-colors"
+              >
+                Home
+              </a>
+              <a
+                href="#"
+                className="text-white hover:text-green-400 transition-colors"
+              >
+                Sports
+              </a>
+              <a
+                href="#"
+                className="text-white hover:text-green-400 transition-colors"
+              >
+                Contact
+              </a>
             </nav>
           </div>
         </header>
@@ -38,14 +53,19 @@ const Homepage: React.FC<HomepageProps> = ({ onBookSlot }) => {
         {/* Main Content */}
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="text-center max-w-4xl mx-auto">
-            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-              Book Your Perfect
-              <span className="text-green-400 block">Sports Experience</span>
+            <div className="mb-2">
+              <span className="text-xs md:text-base font-semibold text-white tracking-widest uppercase italic drop-shadow-md">
+                Book Your Slot at
+              </span>
+            </div>
+            <h2 className="text-2xl md:text-6xl font-bold text-white mb-6 leading-tight">
+              <span className="text-green-400 block">FLASH SPORTS</span>
             </h2>
-            <p className="text-xl md:text-2xl text-gray-200 mb-12 max-w-2xl mx-auto">
-              Reserve premium sports facilities with just a few clicks. Available 24/7 for all your favorite games.
-            </p>
-            
+            {/* <p className="text-xl md:text-2xl text-gray-200 mb-12 max-w-2xl mx-auto">
+              Reserve premium sports facilities with just a few clicks.
+              Available 24/7 for all your favorite games.
+            </p> */}
+
             <button
               onClick={onBookSlot}
               className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-12 rounded-full text-xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-green-500/25"
@@ -89,7 +109,9 @@ const Homepage: React.FC<HomepageProps> = ({ onBookSlot }) => {
 
         {/* Footer */}
         <footer className="p-6 text-center">
-          <p className="text-gray-400">© 2025 TurfBooker. Premium sports facility booking.</p>
+          <p className="text-gray-400">
+            © 2025 Turfers. Premium sports facility booking.
+          </p>
         </footer>
       </div>
     </div>

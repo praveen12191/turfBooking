@@ -1,69 +1,78 @@
-import React, { useState } from 'react';
-import Homepage from './components/Homepage';
-import GameSelection from './components/GameSelection';
-import TimeSlotBooking from './components/TimeSlotBooking';
-import BookingConfirmation from './components/BookingConfirmation';
-import { games } from './data/mockData';
-import { BookingStep, BookingState } from './types';
+import React, { useState } from "react";
+import Homepage from "./components/Homepage";
+import GameSelection from "./components/GameSelection";
+import TimeSlotBooking from "./components/TimeSlotBooking";
+import BookingConfirmation from "./components/BookingConfirmation";
+import { games } from "./data/mockData";
+import { BookingStep, BookingState } from "./types";
 
 function App() {
-  const [currentStep, setCurrentStep] = useState<BookingStep>('home');
+  const [currentStep, setCurrentStep] = useState<BookingStep>("home");
   const [bookingState, setBookingState] = useState<BookingState>({
     selectedGame: null,
-    selectedTimeSlot: null,
-    selectedCourt: null
+    selectedTimeSlots: [],
+    selectedCourt: null,
+    totalCost: 0,
   });
 
   const handleBookSlot = () => {
-    setCurrentStep('games');
+    setCurrentStep("games");
   };
 
   const handleGameSelect = (game: any) => {
-    setBookingState(prev => ({ ...prev, selectedGame: game }));
-    setCurrentStep('slots');
+    setBookingState((prev) => ({ ...prev, selectedGame: game }));
+    setCurrentStep("slots");
   };
 
   const handleBackToHome = () => {
-    setCurrentStep('home');
+    setCurrentStep("home");
     setBookingState({
       selectedGame: null,
-      selectedTimeSlot: null,
-      selectedCourt: null
+      selectedTimeSlots: [],
+      selectedCourt: null,
+      totalCost: 0,
     });
   };
 
   const handleBackToGames = () => {
-    setCurrentStep('games');
-    setBookingState(prev => ({
+    setCurrentStep("games");
+    setBookingState((prev) => ({
       ...prev,
-      selectedTimeSlot: null,
-      selectedCourt: null
+      selectedTimeSlots: [],
+      selectedCourt: null,
+      totalCost: 0,
     }));
   };
 
-  const handleBookingConfirm = (timeSlot: string, court: number) => {
-    setBookingState(prev => ({
+  const handleBookingConfirm = (
+    timeSlots: string[],
+    court: number,
+    totalCost: number
+  ) => {
+    setBookingState((prev) => ({
       ...prev,
-      selectedTimeSlot: timeSlot,
-      selectedCourt: court
+      selectedTimeSlots: timeSlots,
+      selectedCourt: court,
+      totalCost: totalCost,
     }));
-    setCurrentStep('confirmation');
+    setCurrentStep("confirmation");
   };
 
   const handleNewBooking = () => {
-    setCurrentStep('games');
+    setCurrentStep("games");
     setBookingState({
       selectedGame: null,
-      selectedTimeSlot: null,
-      selectedCourt: null
+      selectedTimeSlots: [],
+      selectedCourt: null,
+      totalCost: 0,
     });
   };
 
   switch (currentStep) {
-    case 'home':
+    case "home":
       return <Homepage onBookSlot={handleBookSlot} />;
-    
-    case 'games':
+
+    case "games":
       return (
         <GameSelection
           games={games}
@@ -71,8 +80,8 @@ function App() {
           onBack={handleBackToHome}
         />
       );
-    
-    case 'slots':
+
+    case "slots":
       return bookingState.selectedGame ? (
         <TimeSlotBooking
           game={bookingState.selectedGame}
@@ -80,21 +89,20 @@ function App() {
           onBookingConfirm={handleBookingConfirm}
         />
       ) : null;
-    
-    case 'confirmation':
-      return (
-        bookingState.selectedGame && 
-        bookingState.selectedTimeSlot && 
-        bookingState.selectedCourt !== null
-      ) ? (
+
+    case "confirmation":
+      return bookingState.selectedGame &&
+        bookingState.selectedTimeSlots.length > 0 &&
+        bookingState.selectedCourt !== null ? (
         <BookingConfirmation
           game={bookingState.selectedGame}
-          timeSlot={bookingState.selectedTimeSlot}
+          timeSlots={bookingState.selectedTimeSlots}
           court={bookingState.selectedCourt}
+          totalCost={bookingState.totalCost}
           onNewBooking={handleNewBooking}
         />
       ) : null;
-    
+
     default:
       return <Homepage onBookSlot={handleBookSlot} />;
   }

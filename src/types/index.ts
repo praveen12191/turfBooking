@@ -12,8 +12,9 @@ export interface TimeSlot {
 
 export interface BookingState {
   selectedGame: Game | null;
-  selectedTimeSlot: string | null;
+  selectedTimeSlots: string[];
   selectedCourt: number | null;
+  totalCost: number;
 }
 
-export type BookingStep = 'home' | 'games' | 'slots' | 'confirmation';
+export type BookingStep = "home" | "games" | "slots" | "confirmation";
